@@ -1,26 +1,26 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Compass, Zap, ArrowUp } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 
 export default function ScrollTelemetryHUD() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [velocityLevel, setVelocityLevel] = useState(1);
-  const [activeSection, setActiveSection] = useState("HERO");
-  const [isHovered, setIsHovered] = useState(false);
+  const [activeSectionId, setActiveSectionId] = useState("hero");
+  const [hoveredSection, setHoveredSection] = useState<string | null>(null);
 
   const sections = [
-    { id: "hero", label: "01. HERO", name: "Pravin Avhad" },
-    { id: "cred", label: "02. CRED", name: "Backend SDE" },
-    { id: "skills", label: "03. STACK", name: "Tech Matrix" },
-    { id: "projects", label: "04. LABS", name: "3D Carousel" },
-    { id: "hackathons", label: "05. ARENA", name: "SIH Winner" },
-    { id: "freelance", label: "06. CLIENTS", name: "22+ Shipped" },
-    { id: "lab", label: "07. SYSTEM", name: "Arch Simulator" },
-    { id: "journey", label: "08. STORY", name: "Bangalore Life" },
-    { id: "hire-me", label: "09. HIRE", name: "Full/Fractional" },
-    { id: "contact", label: "10. REACH", name: "Let's Talk" },
+    { id: "hero", num: "01", name: "Hero" },
+    { id: "cred", num: "02", name: "CRED SDE" },
+    { id: "skills", num: "03", name: "Skills Matrix" },
+    { id: "projects", num: "04", name: "3D Carousel" },
+    { id: "hackathons", num: "05", name: "SIH Winner" },
+    { id: "freelance", num: "06", name: "Clients" },
+    { id: "lab", num: "07", name: "System Lab" },
+    { id: "journey", num: "08", name: "Journey" },
+    { id: "hire-me", num: "09", name: "Hire Me" },
+    { id: "contact", num: "10", name: "Contact" },
   ];
 
   useEffect(() => {
@@ -36,31 +36,29 @@ export default function ScrollTelemetryHUD() {
       const progress = Math.min(Math.max(currentScrollY / maxScroll, 0), 1);
       setScrollProgress(Math.round(progress * 100));
 
-      // Compute scroll velocity
+      // Velocity calculation
       const delta = Math.abs(currentScrollY - lastScrollY);
       lastScrollY = currentScrollY;
-
-      // Map delta to velocity levels (1 to 5)
-      const level = Math.min(Math.max(Math.ceil(delta / 14), 1), 5);
+      const level = Math.min(Math.max(Math.ceil(delta / 16), 1), 4);
       setVelocityLevel(level);
 
       clearTimeout(velocityTimeout);
       velocityTimeout = setTimeout(() => {
         setVelocityLevel(1);
-      }, 150);
+      }, 140);
 
       // Detect active section
       for (let i = sections.length - 1; i >= 0; i--) {
         const sec = sections[i];
-        if (sec.id === "hero" && currentScrollY < 400) {
-          setActiveSection("01. HERO");
+        if (sec.id === "hero" && currentScrollY < 350) {
+          setActiveSectionId("hero");
           break;
         }
         const el = document.getElementById(sec.id);
         if (el) {
           const rect = el.getBoundingClientRect();
           if (rect.top <= window.innerHeight * 0.45) {
-            setActiveSection(sec.label);
+            setActiveSectionId(sec.id);
             break;
           }
         }
@@ -89,109 +87,113 @@ export default function ScrollTelemetryHUD() {
 
   return (
     <aside
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="fixed right-4 sm:right-6 top-1/2 -translate-y-1/2 z-40 hidden xl:flex flex-col items-end gap-3 select-none pointer-events-auto"
-      aria-label="Scroll Telemetry & Section Navigator"
+      className="fixed right-3 sm:right-5 top-1/2 -translate-y-1/2 z-40 hidden lg:flex flex-col items-center select-none pointer-events-auto"
+      aria-label="Scroll Navigator"
     >
-      {/* Telemetry Capsule */}
+      {/* Sleek, Slender Micro-Capsule (Width: ~34px) */}
       <motion.div
-        animate={{ width: isHovered ? "auto" : "auto" }}
-        className="bg-[#09090C]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-3 shadow-[0_12px_40px_rgba(0,0,0,0.6)] flex flex-col items-end gap-2.5 transition-all duration-300"
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="w-9 py-2.5 px-1 bg-[#09090C]/85 backdrop-blur-xl border border-white/10 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.65)] flex flex-col items-center gap-2"
       >
-        {/* Top: Progress Percentage & Coordinates */}
-        <div className="flex items-center gap-2 text-right">
-          <div className="flex flex-col items-end">
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest leading-none">
-              TELEMETRY
-            </span>
-            <span className="font-display font-extrabold text-base text-[#00E599] leading-tight">
-              {scrollProgress.toString().padStart(2, "0")}%
-            </span>
-          </div>
-          <div className="w-2 h-2 rounded-full bg-[#00E599] animate-pulse" />
+        {/* Top: Minimal Crisp Percentage Counter */}
+        <div className="flex flex-col items-center">
+          <span className="font-mono text-[9px] font-bold text-[#00E599] leading-none tracking-tighter">
+            {scrollProgress}%
+          </span>
+          <span className="w-1 h-1 rounded-full bg-[#00E599] mt-1 animate-pulse" />
         </div>
 
-        {/* Current Active Section Badge */}
-        <div className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[10px] font-mono font-semibold text-zinc-300 max-w-[120px] truncate text-right">
-          {activeSection}
+        {/* Vertical Rail with Pips */}
+        <div className="relative py-1 flex flex-col items-center gap-1.5 my-0.5">
+          {/* Subtle vertical center line */}
+          <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[1px] bg-white/10" />
+
+          {/* Dynamic Laser Progress Fill */}
+          <div
+            style={{ height: `${scrollProgress}%` }}
+            className="absolute left-1/2 -translate-x-1/2 top-0 w-[1px] bg-[#00E599] shadow-[0_0_8px_#00E599] transition-all duration-150"
+          />
+
+          {/* Interactive Micro Pips */}
+          {sections.map((sec) => {
+            const isActive = activeSectionId === sec.id;
+            const isPipHovered = hoveredSection === sec.id;
+
+            return (
+              <div
+                key={sec.id}
+                className="relative flex items-center justify-center py-0.5"
+                onMouseEnter={() => setHoveredSection(sec.id)}
+                onMouseLeave={() => setHoveredSection(null)}
+              >
+                {/* Floating Tooltip to the Left on Hover */}
+                <AnimatePresence>
+                  {isPipHovered && (
+                    <motion.div
+                      initial={{ opacity: 0, x: 8, scale: 0.95 }}
+                      animate={{ opacity: 1, x: 0, scale: 1 }}
+                      exit={{ opacity: 0, x: 8, scale: 0.95 }}
+                      transition={{ duration: 0.18, ease: "easeOut" }}
+                      className="absolute right-9 pointer-events-none whitespace-nowrap px-2.5 py-1 rounded-md bg-[#0C0C10]/95 backdrop-blur-md border border-white/15 text-[10px] font-mono shadow-[0_6px_20px_rgba(0,0,0,0.6)] flex items-center gap-1.5 z-50 text-white"
+                    >
+                      <span className="text-[#00E599] font-bold">{sec.num}</span>
+                      <span className="text-zinc-500">//</span>
+                      <span className="text-zinc-200">{sec.name}</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* The Dot Pip */}
+                <button
+                  onClick={() => scrollToSection(sec.id)}
+                  aria-label={`Jump to ${sec.name}`}
+                  className="relative p-0.5 group outline-none"
+                  data-cursor-text={sec.id.toUpperCase()}
+                >
+                  <motion.div
+                    animate={{
+                      scale: isActive ? 1.35 : isPipHovered ? 1.2 : 1,
+                    }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    className={`w-2 h-2 rounded-full transition-colors duration-200 ${
+                      isActive
+                        ? "bg-[#00E599] shadow-[0_0_10px_#00E599]"
+                        : "bg-zinc-700/80 hover:bg-[#00E599]/80 border border-white/10 hover:border-[#00E599]"
+                    }`}
+                  />
+                </button>
+              </div>
+            );
+          })}
         </div>
 
-        {/* Dynamic Velocity Equalizer Bars (Reacts dynamically to scroll speed) */}
-        <div className="flex items-end gap-1 h-3.5 px-1 py-0.5 bg-black/40 rounded border border-white/5">
-          {[1, 2, 3, 4, 5].map((bar) => {
+        {/* Minimal Scroll Velocity Equalizer (3 micro bars) */}
+        <div className="flex items-end gap-0.5 h-2 px-0.5">
+          {[1, 2, 3].map((bar) => {
             const isLit = bar <= velocityLevel;
             return (
               <span
                 key={bar}
-                style={{ height: `${bar * 20}%` }}
-                className={`w-1 rounded-sm transition-all duration-100 ${
-                  isLit ? "bg-[#00E599] shadow-[0_0_6px_#00E599]" : "bg-zinc-800"
+                style={{ height: `${bar * 33}%` }}
+                className={`w-0.5 rounded-full transition-all duration-150 ${
+                  isLit ? "bg-[#00E599] shadow-[0_0_4px_#00E599]" : "bg-zinc-800"
                 }`}
               />
             );
           })}
         </div>
 
-        {/* Vertical Interactive Scrubber Track with Pips */}
-        <div className="relative py-2 flex flex-col items-end gap-2 my-1">
-          {/* Subtle vertical spine rail */}
-          <div className="absolute right-[5px] top-0 bottom-0 w-[1px] bg-white/10" />
-
-          {/* Active Progress Fill line */}
-          <div
-            style={{ height: `${scrollProgress}%` }}
-            className="absolute right-[5px] top-0 w-[1px] bg-gradient-to-b from-[#00E599] to-[#00FF87] transition-all duration-150"
-          />
-
-          {/* Interactive Navigation Pips */}
-          {sections.map((sec) => {
-            const isActive = activeSection.startsWith(sec.label.slice(0, 3));
-            return (
-              <button
-                key={sec.id}
-                onClick={() => scrollToSection(sec.id)}
-                className="group relative flex items-center justify-end gap-2 py-0.5 outline-none"
-                aria-label={`Jump to ${sec.name}`}
-                data-cursor-text={sec.id.toUpperCase()}
-              >
-                {/* Hover Flyout Label */}
-                <span
-                  className={`text-[10px] font-mono tracking-wider transition-all duration-200 pointer-events-none whitespace-nowrap px-1.5 py-0.5 rounded ${
-                    isHovered
-                      ? "opacity-100 translate-x-0"
-                      : "opacity-0 translate-x-2 hidden group-hover:block"
-                  } ${
-                    isActive
-                      ? "text-[#00E599] font-bold bg-[#00E599]/10 border border-[#00E599]/30"
-                      : "text-zinc-400 bg-black/80 border border-white/5"
-                  }`}
-                >
-                  {sec.name}
-                </span>
-
-                {/* Dot */}
-                <div
-                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 relative z-10 flex items-center justify-center ${
-                    isActive
-                      ? "bg-[#00E599] shadow-[0_0_12px_#00E599] scale-125"
-                      : "bg-zinc-800 border border-white/20 hover:border-[#00E599] hover:bg-zinc-600"
-                  }`}
-                />
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Bottom Coordinates or Back to Top Trigger */}
+        {/* Quick Back to Top Micro Trigger */}
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="text-[9px] font-mono text-zinc-500 hover:text-[#00E599] transition-colors flex items-center gap-1 mt-1 pt-1 border-t border-white/5 w-full justify-end"
+          className="w-5 h-5 rounded-full bg-white/5 hover:bg-[#00E599]/20 hover:text-[#00E599] text-zinc-400 flex items-center justify-center transition-all duration-200 mt-0.5"
           title="Scroll to Top"
+          aria-label="Scroll to Top"
           data-cursor-text="TOP"
         >
-          <span>TOP</span>
-          <ArrowUp className="w-3 h-3" />
+          <ArrowUp className="w-2.5 h-2.5" />
         </button>
       </motion.div>
     </aside>
