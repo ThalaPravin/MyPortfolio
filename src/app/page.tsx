@@ -5,6 +5,8 @@ import UpwardSparkles from "@/components/UpwardSparkles";
 import LightingBee from "@/components/LightingBee";
 import AmbientBackground from "@/components/AmbientBackground";
 import Navbar from "@/components/Navbar";
+import ScrollTelemetryHUD from "@/components/ScrollTelemetryHUD";
+import KineticScrollMarquee from "@/components/KineticScrollMarquee";
 import Hero from "@/components/Hero";
 import CredExperience from "@/components/CredExperience";
 import SkillsSection from "@/components/SkillsSection";
@@ -44,6 +46,9 @@ export default function Home() {
       {/* Sleek, Uncluttered Floating Navigation Capsule */}
       <Navbar />
 
+      {/* Interactive Right-Rail Kinetic Mission Telemetry & Navigator */}
+      <ScrollTelemetryHUD />
+
       {/* Hero Section */}
       <Hero />
 
@@ -52,6 +57,9 @@ export default function Home() {
 
       {/* Skills Matrix with Official Brand SVG Logos */}
       <SkillsSection />
+
+      {/* Dynamic Velocity-Reactive Kinetic Marquee */}
+      <KineticScrollMarquee />
 
       {/* Engineered Systems & Enterprise CRM/Full Stack Projects */}
       <FeaturedProjects />
